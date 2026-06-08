@@ -1,24 +1,29 @@
-name: Compilar Launcher
+name: Compilar Launcher Clásico
 on:
   push:
-    branches: [ master ] # Cambiado a master porque esa es tu rama principal
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019 # Versión de Windows ideal para .NET clásico
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Configurar .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
 
-    - name: Publicar Ejecutable
-      run: dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:ReadyToRun=true -o ./dist
+    - name: Configurar NuGet (Paquetes)
+      uses: NuGet/setup-nuget@v2
 
-    - name: Subir artefacto
+    - name: Configurar MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restaurar paquetes NuGet
+      run: nuget restore
+
+    - name: Compilar Proyecto en Release
+      run: msbuild /p:Configuration=Release /p:Platform="AnyCPU"
+
+    - name: Subir ejecutable final
       uses: actions/upload-artifact@v4
       with:
-        name: LatamLauncher-Windows
-        path: ./dist/*.exe
+        name: Launcher-Compilado
+        path: ./**/bin/Release/*.exe
+      
