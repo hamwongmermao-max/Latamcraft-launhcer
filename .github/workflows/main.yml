@@ -1,0 +1,28 @@
+name: Compilar Launcher Clásico
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-2019 # Versión de Windows ideal para .NET clásico
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configurar NuGet (Paquetes)
+      uses: NuGet/setup-nuget@v2
+
+    - name: Configurar MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restaurar paquetes NuGet
+      run: nuget restore
+
+    - name: Compilar Proyecto en Release
+      run: msbuild /p:Configuration=Release /p:Platform="AnyCPU"
+
+    - name: Subir ejecutable final
+      uses: actions/upload-artifact@v4
+      with:
+        name: Launcher-Compilado
+        path: ./**/bin/Release/*.exe
